@@ -255,7 +255,11 @@ def grafico(titulo: str, figura_fn, serie: str = "data", leitura: str = "",
                     cor=estilo.tinta, peso="heavy", va="top",
                     linespacing=1.18, min_tamanho=18)
 
-    ax = fig.add_axes((MARGEM, 0.335, 1 - 2 * MARGEM, 0.40))
+    # Calha à esquerda para os rótulos de escala e o label do eixo Y. Sem ela,
+    # um ylabel rotacionado vaza para fora do card — erro que só aparece depois
+    # de publicado.
+    CALHA = 0.070
+    ax = fig.add_axes((MARGEM + CALHA, 0.335, 1 - 2 * MARGEM - CALHA, 0.40))
     ax.set_facecolor(estilo.fundo)
     for lado in ("top", "right", "left"):
         ax.spines[lado].set_visible(False)
@@ -296,6 +300,123 @@ def fechamento(frase: str, serie: str = "portfolio", chamada: str = "",
     if transparencia:
         fig.text(MARGEM, 0.160, _quebrar(transparencia, 74), fontsize=9.5,
                  color=estilo.meta, family=texto_f, va="top", linespacing=1.6)
+    return fig
+
+
+# --- card de fórmula ---------------------------------------------------------
+def formula(titulo: str, expressao: str, termos: list[tuple[str, str]] | None = None,
+            serie: str = "research", leitura: str = "", rodape: str = "") -> Figure:
+    """Card com uma definição matemática e o glossário dos termos.
+
+    Este card existe por uma razão editorial específica: a fórmula é o que
+    separa explicar de afirmar. Mostrar ``E = p_W·W̄ − p_L·|L̄|`` e definir cada
+    termo permite que o leitor confira a conta — e é justamente essa
+    possibilidade de conferência que constrói autoridade.
+
+    Parameters
+    ----------
+    expressao:
+        Em sintaxe mathtext do matplotlib, sem os cifrões. Ex.:
+        ``r"E = p_W \\bar{W} - p_L |\\bar{L}|"``.
+    termos:
+        Lista de ``(símbolo, significado)``. Sem isso, a fórmula vira enfeite.
+    """
+    fig, estilo = _base(serie)
+    titulo_f, texto_f = _fontes()
+
+    _texto_ajustado(fig, titulo, MARGEM, 0.875, fonte=titulo_f, tamanho=28,
+                    cor=estilo.tinta, peso="heavy", va="top",
+                    linespacing=1.18, min_tamanho=19)
+
+    # A fórmula fica em uma faixa própria, para respirar.
+    faixa_baixo, faixa_alto = 0.585, 0.755
+    fig.patches.append(plt.Rectangle(
+        (MARGEM, faixa_baixo), 1 - 2 * MARGEM, faixa_alto - faixa_baixo,
+        transform=fig.transFigure,
+        facecolor=brand.SUPERFICIE_SUTIL if serie != "portfolio" else "#1B3B39",
+        edgecolor="none", zorder=0))
+    fig.text(0.5, (faixa_baixo + faixa_alto) / 2, f"${expressao}$",
+             fontsize=34, color=estilo.tinta, ha="center", va="center")
+
+    y = 0.525
+    for simbolo, significado in (termos or []):
+        fig.text(MARGEM, y, f"${simbolo}$", fontsize=17, color=estilo.acento,
+                 va="center")
+        fig.text(MARGEM + 0.085, y, significado, fontsize=15,
+                 color=estilo.tinta, family=texto_f, va="center")
+        y -= 0.052
+
+    if leitura:
+        fig.text(MARGEM, max(y - 0.02, 0.20), _quebrar(leitura, 50),
+                 fontsize=15.5, color=estilo.tinta, family=texto_f, va="top",
+                 linespacing=1.55)
+    if rodape:
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+                 color=estilo.meta, family=texto_f, va="top")
+    return fig
+
+
+# --- card de tabela ----------------------------------------------------------
+def tabela(titulo: str, cabecalho: tuple[str, ...], linhas: list[tuple],
+           serie: str = "research", leitura: str = "", rodape: str = "",
+           destacar: int | None = None) -> Figure:
+    """Card com uma tabela de números.
+
+    Uma tabela comunica precisão de um jeito que um gráfico não comunica: ela
+    declara os valores em vez de sugeri-los. Use quando o ponto do post for a
+    comparação exata entre poucos casos.
+
+    Parameters
+    ----------
+    destacar:
+        Índice da linha que recebe cor de acento — a que sustenta o argumento.
+    """
+    fig, estilo = _base(serie)
+    titulo_f, texto_f = _fontes()
+
+    _texto_ajustado(fig, titulo, MARGEM, 0.875, fonte=titulo_f, tamanho=28,
+                    cor=estilo.tinta, peso="heavy", va="top",
+                    linespacing=1.18, min_tamanho=19)
+
+    n_col = len(cabecalho)
+    largura = (1 - 2 * MARGEM)
+    # Primeira coluna mais larga: costuma carregar o rótulo textual.
+    pesos = [1.7] + [1.0] * (n_col - 1)
+    total = sum(pesos)
+    xs, acumulado = [], MARGEM
+    for p in pesos:
+        xs.append(acumulado)
+        acumulado += largura * p / total
+
+    def _x(i: int) -> float:
+        """Primeira coluna alinha à esquerda; as de número, à direita."""
+        return xs[i] if i == 0 else xs[i] + largura * pesos[i] / total
+
+    y = 0.715
+    for i, rotulo in enumerate(cabecalho):
+        fig.text(_x(i), y, rotulo.upper(), fontsize=11.5, color=estilo.meta,
+                 family=texto_f, fontweight="bold", va="center",
+                 ha="left" if i == 0 else "right")
+    fig.add_artist(plt.Line2D([MARGEM, 1 - MARGEM], [y - 0.022, y - 0.022],
+                              color=estilo.acento, linewidth=2.0))
+
+    y -= 0.062
+    for k, linha in enumerate(linhas):
+        cor = estilo.acento if k == destacar else estilo.tinta
+        peso = "semibold" if k == destacar else "normal"
+        for i, valor in enumerate(linha):
+            fig.text(_x(i), y, str(valor), fontsize=16, color=cor,
+                     family=texto_f, fontweight=peso, va="center",
+                     ha="left" if i == 0 else "right")
+        y -= 0.052
+
+    if leitura:
+        fig.text(MARGEM, max(y - 0.015, 0.20), _quebrar(leitura, 50),
+                 fontsize=15.5, color=estilo.tinta, family=texto_f, va="top",
+                 linespacing=1.55)
+    if rodape:
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+                 color=estilo.meta, family=texto_f, va="top")
     return fig
 
 

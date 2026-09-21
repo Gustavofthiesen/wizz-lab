@@ -147,6 +147,42 @@ def gerar_benchmark(estrategia: Estrategia, beta: float = 0.55,
     return pd.Series(serie, index=idx, name="benchmark")
 
 
+def gerar_par_comparavel(retorno_total: float = 0.15, n_dias: int = 252,
+                         semente: int = 5) -> pd.DataFrame:
+    """Duas carteiras com o MESMO retorno acumulado e riscos muito diferentes.
+
+    Existe para tornar visual um argumento que, em texto, soa abstrato: retorno
+    acumulado idêntico não implica resultado equivalente.
+
+    A carteira A segue uma trajetória de baixa volatilidade. A B tem a mesma
+    deriva média, volatilidade cerca de três vezes maior e um choque negativo
+    no meio do período. Ao final, as duas são reescaladas para fechar
+    exatamente em `retorno_total`, de modo que a única diferença entre elas
+    seja o caminho.
+
+    Returns
+    -------
+    DataFrame com as colunas ``A`` e ``B``, retornos diários indexados por data.
+    """
+    rng = np.random.default_rng(semente)
+    idx = pd.bdate_range("2026-01-02", periods=n_dias)
+
+    a = rng.normal(0.0006, 0.005, n_dias)
+    b = rng.normal(0.0006, 0.016, n_dias)
+    # Um choque concentrado: é o que separa volatilidade de risco de cauda.
+    choque = slice(int(n_dias * 0.45), int(n_dias * 0.58))
+    b[choque] -= 0.010
+
+    saida = {}
+    for nome, serie in (("A", a), ("B", b)):
+        # Reescala aditiva para que ambas fechem no mesmo retorno acumulado.
+        atual = float(np.prod(1 + serie) - 1)
+        ajuste = (np.log1p(retorno_total) - np.log1p(atual)) / n_dias
+        saida[nome] = np.expm1(np.log1p(serie) + ajuste)
+
+    return pd.DataFrame(saida, index=idx)
+
+
 def gerar_sinal(n: int = 3000, ic_verdadeiro: float = 0.045,
                 semente: int = 11) -> pd.DataFrame:
     """Gera pares (score do indicador, retorno futuro) com IC conhecido.

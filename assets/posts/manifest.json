@@ -5,13 +5,15 @@
     "serie": "Concept",
     "semana": 1,
     "dia": "Terça",
-    "n_cards": 5,
+    "n_cards": 7,
     "arquivos": [
       "post-001-incerteza-01.png",
       "post-001-incerteza-02.png",
       "post-001-incerteza-03.png",
       "post-001-incerteza-04.png",
-      "post-001-incerteza-05.png"
+      "post-001-incerteza-05.png",
+      "post-001-incerteza-06.png",
+      "post-001-incerteza-07.png"
     ]
   },
   {
@@ -20,13 +22,15 @@
     "serie": "Concept",
     "semana": 1,
     "dia": "Quinta",
-    "n_cards": 5,
+    "n_cards": 7,
     "arquivos": [
       "post-002-duas-carteiras-01.png",
       "post-002-duas-carteiras-02.png",
       "post-002-duas-carteiras-03.png",
       "post-002-duas-carteiras-04.png",
-      "post-002-duas-carteiras-05.png"
+      "post-002-duas-carteiras-05.png",
+      "post-002-duas-carteiras-06.png",
+      "post-002-duas-carteiras-07.png"
     ]
   },
   {
@@ -35,13 +39,15 @@
     "serie": "Portfolio",
     "semana": 1,
     "dia": "Domingo",
-    "n_cards": 5,
+    "n_cards": 7,
     "arquivos": [
       "post-003-regras-01.png",
       "post-003-regras-02.png",
       "post-003-regras-03.png",
       "post-003-regras-04.png",
-      "post-003-regras-05.png"
+      "post-003-regras-05.png",
+      "post-003-regras-06.png",
+      "post-003-regras-07.png"
     ]
   },
   {
@@ -50,13 +56,15 @@
     "serie": "Data",
     "semana": 2,
     "dia": "Terça",
-    "n_cards": 5,
+    "n_cards": 7,
     "arquivos": [
       "post-004-assimetria-01.png",
       "post-004-assimetria-02.png",
       "post-004-assimetria-03.png",
       "post-004-assimetria-04.png",
-      "post-004-assimetria-05.png"
+      "post-004-assimetria-05.png",
+      "post-004-assimetria-06.png",
+      "post-004-assimetria-07.png"
     ]
   },
   {
@@ -65,13 +73,15 @@
     "serie": "Research",
     "semana": 2,
     "dia": "Quinta",
-    "n_cards": 5,
+    "n_cards": 7,
     "arquivos": [
       "post-005-media-engana-01.png",
       "post-005-media-engana-02.png",
       "post-005-media-engana-03.png",
       "post-005-media-engana-04.png",
-      "post-005-media-engana-05.png"
+      "post-005-media-engana-05.png",
+      "post-005-media-engana-06.png",
+      "post-005-media-engana-07.png"
     ]
   },
   {
@@ -80,13 +90,15 @@
     "serie": "Portfolio",
     "semana": 2,
     "dia": "Domingo",
-    "n_cards": 5,
+    "n_cards": 7,
     "arquivos": [
       "post-006-medir-01.png",
       "post-006-medir-02.png",
       "post-006-medir-03.png",
       "post-006-medir-04.png",
-      "post-006-medir-05.png"
+      "post-006-medir-05.png",
+      "post-006-medir-06.png",
+      "post-006-medir-07.png"
     ]
   }
 ]

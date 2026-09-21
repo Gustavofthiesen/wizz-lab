@@ -71,6 +71,7 @@ def aplicar_tema(escuro: bool = False) -> None:
         "font.family": "sans-serif",
         "font.sans-serif": [_primeira_fonte_disponivel(brand.FONTES_TEXTO)],
         "font.size": 10.5,
+        "mathtext.fontset": "stix",   # fórmula com cara de publicação, não de slide
 
         "text.color": tinta,
         "axes.labelcolor": meta,
@@ -148,6 +149,24 @@ def figura(titulo: str, subtitulo: str = "", fonte: str = "",
         fig.text(0.0, -0.035, fonte, fontsize=8, color=meta, ha="left",
                  va="top")
     return fig, ax
+
+
+def formatar_br(valor: float, casas: int = 0, percentual: bool = True) -> str:
+    """Formata um número no padrão tipográfico da casa.
+
+    Vírgula decimal e sinal de menos U+2212, não o hífen ASCII. O hífen tem
+    cerca de metade da largura do menos e desalinha uma coluna de números --
+    é o detalhe que separa um gráfico de publicação de um gráfico de planilha.
+    """
+    texto = f"{valor:.{casas}%}" if percentual else f"{valor:,.{casas}f}"
+    return texto.replace(",", " ").replace(".", ",").replace("-", "−")
+
+
+def eixo_percentual(ax, eixo: str = "y", casas: int = 0) -> None:
+    """Aplica o formatador percentual da marca a um eixo."""
+    from matplotlib.ticker import FuncFormatter
+    getattr(ax, f"{eixo}axis").set_major_formatter(
+        FuncFormatter(lambda v, _: formatar_br(v, casas)))
 
 
 def rotular_direto(ax, x, y, texto: str, cor: str, dx: float = 6.0,

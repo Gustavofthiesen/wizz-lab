@@ -16,18 +16,20 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter, PercentFormatter
+from matplotlib.ticker import FuncFormatter
 
 from . import brand
-from .theme import figura, rotular_direto
+from .theme import figura, rotular_direto, formatar_br
 from .metrics import risco, sinal, evidencia
 
-_PCT = PercentFormatter(xmax=1, decimals=0)
+#: Percentual com vírgula decimal e menos tipográfico (ver theme.formatar_br).
+_PCT = FuncFormatter(lambda v, _: formatar_br(v, 0))
 
 
 def _fmt_r(ax, eixo: str = "x") -> None:
     getattr(ax, f"{eixo}axis").set_major_formatter(
-        FuncFormatter(lambda v, _: f"{v:+.1f}R"))
+        FuncFormatter(lambda v, _: f"{v:+.1f}R".replace(".", ",")
+                      .replace("-", "−")))
 
 
 # --- curva de capital --------------------------------------------------------
