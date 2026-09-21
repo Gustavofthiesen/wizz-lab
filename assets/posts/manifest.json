@@ -1,0 +1,92 @@
+[
+  {
+    "slug": "post-001-incerteza",
+    "titulo": "Investir não é prever. É decidir sob incerteza.",
+    "serie": "Concept",
+    "semana": 1,
+    "dia": "Terça",
+    "n_cards": 5,
+    "arquivos": [
+      "post-001-incerteza-01.png",
+      "post-001-incerteza-02.png",
+      "post-001-incerteza-03.png",
+      "post-001-incerteza-04.png",
+      "post-001-incerteza-05.png"
+    ]
+  },
+  {
+    "slug": "post-002-duas-carteiras",
+    "titulo": "Duas carteiras renderam 15%. Qual foi melhor?",
+    "serie": "Concept",
+    "semana": 1,
+    "dia": "Quinta",
+    "n_cards": 5,
+    "arquivos": [
+      "post-002-duas-carteiras-01.png",
+      "post-002-duas-carteiras-02.png",
+      "post-002-duas-carteiras-03.png",
+      "post-002-duas-carteiras-04.png",
+      "post-002-duas-carteiras-05.png"
+    ]
+  },
+  {
+    "slug": "post-003-regras",
+    "titulo": "Wizz Portfolio — as regras antes da primeira posição",
+    "serie": "Portfolio",
+    "semana": 1,
+    "dia": "Domingo",
+    "n_cards": 5,
+    "arquivos": [
+      "post-003-regras-01.png",
+      "post-003-regras-02.png",
+      "post-003-regras-03.png",
+      "post-003-regras-04.png",
+      "post-003-regras-05.png"
+    ]
+  },
+  {
+    "slug": "post-004-assimetria",
+    "titulo": "Perdeu 50%? Ganhar 50% não leva você de volta.",
+    "serie": "Data",
+    "semana": 2,
+    "dia": "Terça",
+    "n_cards": 5,
+    "arquivos": [
+      "post-004-assimetria-01.png",
+      "post-004-assimetria-02.png",
+      "post-004-assimetria-03.png",
+      "post-004-assimetria-04.png",
+      "post-004-assimetria-05.png"
+    ]
+  },
+  {
+    "slug": "post-005-media-engana",
+    "titulo": "Por que a média de retorno pode enganar?",
+    "serie": "Research",
+    "semana": 2,
+    "dia": "Quinta",
+    "n_cards": 5,
+    "arquivos": [
+      "post-005-media-engana-01.png",
+      "post-005-media-engana-02.png",
+      "post-005-media-engana-03.png",
+      "post-005-media-engana-04.png",
+      "post-005-media-engana-05.png"
+    ]
+  },
+  {
+    "slug": "post-006-medir",
+    "titulo": "Wizz Portfolio — como vamos medir desempenho",
+    "serie": "Portfolio",
+    "semana": 2,
+    "dia": "Domingo",
+    "n_cards": 5,
+    "arquivos": [
+      "post-006-medir-01.png",
+      "post-006-medir-02.png",
+      "post-006-medir-03.png",
+      "post-006-medir-04.png",
+      "post-006-medir-05.png"
+    ]
+  }
+]
