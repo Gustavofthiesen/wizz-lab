@@ -420,6 +420,158 @@ def tabela(titulo: str, cabecalho: tuple[str, ...], linhas: list[tuple],
     return fig
 
 
+# --- card de código ----------------------------------------------------------
+def codigo(titulo: str, linhas: list[str], saida: list[str] | None = None,
+           serie: str = "research", leitura: str = "", rodape: str = "") -> Figure:
+    """Card com código executável e a saída que ele produz.
+
+    Este é o card que nenhum perfil de educação financeira consegue publicar, e
+    é por isso que ele existe. Ele não afirma que o cálculo é possível: mostra
+    as cinco linhas que o fazem, e o número que sai delas.
+
+    Comentários (linhas iniciadas por ``#``) recebem a cor de metadado, para
+    que a estrutura do trecho seja legível de relance no celular.
+
+    Parameters
+    ----------
+    linhas:
+        O trecho de código, uma string por linha. Mantenha abaixo de 10 linhas
+        e 52 colunas — acima disso não se lê em tela de telefone.
+    saida:
+        O que o trecho imprime. Aparece destacado, em cor de acento.
+    """
+    fig, estilo = _base(serie)
+    titulo_f, texto_f = _fontes()
+    mono = _primeira_fonte_disponivel(
+        ("Cascadia Mono", "Consolas", "JetBrains Mono", "DejaVu Sans Mono"))
+
+    _texto_ajustado(fig, titulo, MARGEM, 0.875, fonte=titulo_f, tamanho=27,
+                    cor=estilo.tinta, peso="heavy", va="top",
+                    linespacing=1.18, min_tamanho=18)
+
+    fundo_bloco = brand.SUPERFICIE_SUTIL if serie != "portfolio" else "#1B3B39"
+    altura_linha = 0.030
+    n = len(linhas) + (len(saida) + 1 if saida else 0)
+    topo = 0.760
+    baixo = topo - altura_linha * n - 0.050
+    fig.patches.append(plt.Rectangle(
+        (MARGEM, baixo), 1 - 2 * MARGEM, topo - baixo,
+        transform=fig.transFigure, facecolor=fundo_bloco, edgecolor="none",
+        zorder=0))
+
+    y = topo - 0.034
+    for linha in linhas:
+        cor = estilo.meta if linha.lstrip().startswith("#") else estilo.tinta
+        fig.text(MARGEM + 0.028, y, linha, fontsize=14.5, family=mono,
+                 color=cor, va="center")
+        y -= altura_linha
+
+    if saida:
+        y -= altura_linha * 0.35
+        fig.add_artist(plt.Line2D(
+            [MARGEM + 0.028, 1 - MARGEM - 0.028], [y + 0.014, y + 0.014],
+            color=estilo.acento, linewidth=1.2, alpha=0.55))
+        y -= altura_linha * 0.30
+        for linha in saida:
+            fig.text(MARGEM + 0.028, y, linha, fontsize=14.5, family=mono,
+                     color=estilo.acento, va="center", fontweight="bold")
+            y -= altura_linha
+
+    if leitura:
+        fig.text(MARGEM, baixo - 0.030, _quebrar(leitura, 50), fontsize=15.5,
+                 color=estilo.tinta, family=texto_f, va="top", linespacing=1.55)
+    if rodape:
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+                 color=estilo.meta, family=texto_f, va="top")
+    return fig
+
+
+# --- card de referências -----------------------------------------------------
+def referencias(titulo: str, itens: list[tuple[str, str]],
+                serie: str = "research", leitura: str = "",
+                rodape: str = "") -> Figure:
+    """Card com a bibliografia, com identificador verificável.
+
+    Um post que cita "estudos mostram" pede confiança. Um post que imprime
+    autor, ano, periódico e DOI dispensa confiança — e é essa diferença que
+    define o público que o conteúdo atrai.
+
+    Parameters
+    ----------
+    itens:
+        Lista de ``(referência, identificador)``. O identificador é o DOI ou o
+        periódico, impresso abaixo em cor de metadado.
+    """
+    fig, estilo = _base(serie)
+    titulo_f, texto_f = _fontes()
+
+    _texto_ajustado(fig, titulo, MARGEM, 0.875, fonte=titulo_f, tamanho=27,
+                    cor=estilo.tinta, peso="heavy", va="top",
+                    linespacing=1.18, min_tamanho=18)
+
+    y = 0.735
+    for i, (ref, ident) in enumerate(itens, start=1):
+        fig.text(MARGEM, y, f"{i}", fontsize=15, color=estilo.acento,
+                 family=texto_f, fontweight="bold", va="top")
+        corpo = _quebrar(ref, 46)
+        fig.text(MARGEM + 0.042, y, corpo, fontsize=14.5, color=estilo.tinta,
+                 family=texto_f, va="top", linespacing=1.45)
+        desce = 0.034 * (corpo.count("\n") + 1)
+        fig.text(MARGEM + 0.042, y - desce - 0.006, ident, fontsize=11.5,
+                 color=estilo.meta, family=texto_f, va="top")
+        y -= desce + 0.058
+
+    if leitura:
+        fig.text(MARGEM, max(y - 0.010, 0.195), _quebrar(leitura, 50),
+                 fontsize=15, color=estilo.tinta, family=texto_f, va="top",
+                 linespacing=1.55)
+    if rodape:
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+                 color=estilo.meta, family=texto_f, va="top")
+    return fig
+
+
+# --- card de questões em aberto ----------------------------------------------
+def em_aberto(titulo: str, questoes: list[str], serie: str = "research",
+              proximo: str = "", rodape: str = "") -> Figure:
+    """Card que fecha o carrossel com o que ficou por resolver.
+
+    Substitui o card de conclusão. A diferença é deliberada: uma conclusão
+    encerra o assunto e um conjunto de questões em aberto não — e o segundo é
+    o que faz alguém procurar o próximo post, o notebook ou o artigo.
+
+    Nenhuma das questões deve ser retórica. Todas precisam ter resposta
+    conhecida, calculável, e endereço declarado no repositório ou na trilha.
+    """
+    fig, estilo = _base(serie)
+    titulo_f, texto_f = _fontes()
+
+    _texto_ajustado(fig, titulo, MARGEM, 0.875, fonte=titulo_f, tamanho=27,
+                    cor=estilo.tinta, peso="heavy", va="top",
+                    linespacing=1.18, min_tamanho=18)
+
+    y = 0.720
+    for i, questao in enumerate(questoes, start=1):
+        fig.text(MARGEM, y, f"{i:02d}", fontsize=15, color=estilo.acento,
+                 family=texto_f, fontweight="bold", va="top")
+        corpo = _quebrar(questao, 42)
+        fig.text(MARGEM + 0.062, y, corpo, fontsize=16, color=estilo.tinta,
+                 family=texto_f, va="top", linespacing=1.5)
+        y -= 0.038 * (corpo.count("\n") + 1) + 0.036
+
+    if proximo:
+        # A régua sobe o suficiente para que três linhas de `proximo` ainda
+        # fiquem acima do rodapé, que é fixo em 0.115.
+        fig.add_artist(plt.Line2D([MARGEM, 1 - MARGEM], [0.255, 0.255],
+                                  color=estilo.acento, linewidth=2.0))
+        fig.text(MARGEM, 0.230, _quebrar(proximo, 52), fontsize=14,
+                 color=estilo.tinta, family=texto_f, va="top", linespacing=1.5)
+    if rodape:
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+                 color=estilo.meta, family=texto_f, va="top")
+    return fig
+
+
 # --- utilidades --------------------------------------------------------------
 def salvar(fig: Figure, caminho: str) -> str:
     """Salva o card em PNG no tamanho exato de 1080 × 1350, sem recorte.

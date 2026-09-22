@@ -8,13 +8,19 @@ interpolado do cálculo, nunca digitado à mão.
 
 Padrão de construção de cada carrossel (7 cards):
 
-1. **Capa** — a pergunta, formulada com precisão
+1. **Capa** — a afirmação, com o número
 2. **Definição** — fórmula e glossário dos termos
 3. **Evidência 1** — gráfico
 4. **Evidência 2** — tabela ou segundo gráfico, com números exatos
-5. **Mecanismo** — por que o fenômeno ocorre
-6. **Ponto de atenção** — a leitura perigosa, com a referência da literatura
-7. **Fechamento** — link do código e bloco de transparência
+5. **Evidência 3** — o mecanismo, em gráfico ou tabela
+6. **Código** — o trecho que reproduz o resultado, e a saída que ele imprime
+7. **Em aberto** — as questões que o post não resolve, e onde estão as respostas
+
+Os dois últimos cards existem no lugar de um card de conclusão, e a troca é
+deliberada. Uma conclusão encerra o assunto; código executável e questões em
+aberto não encerram — e são eles que fazem alguém procurar o notebook, o artigo
+ou o post seguinte. Aforismo ("X não é Y, é Z") está banido do roteiro: ele
+ocupa o espaço de um dado sem acrescentar informação.
 
 Rodar::
 
@@ -52,6 +58,17 @@ EST = data.gerar_estrategia(semente=42)
 BENCH = data.gerar_benchmark(EST)
 R = EST.trades.r_multiple.values
 PAR = data.gerar_par_comparavel()
+
+# --- Saídas reais dos cards de código ----------------------------------------
+# Cada card de código mostra um trecho e o que ele imprime. Os valores abaixo
+# são calculados aqui, de modo que o "output" impresso no card seja literalmente
+# o resultado do trecho ao lado — e não uma transcrição feita à mão.
+MC_MDD = metrics.risco.monte_carlo_mdd(R)
+SEM_TOP5 = metrics.sinal.remove_best_trades(R, n=5)
+REG = metrics.execucao.beta_e_alfa(EST.diario.values, BENCH.values)
+PESOS_EXEMPLO = [0.28, 0.22, 0.18, 0.14, 0.10, 0.08]
+HHI_EXEMPLO = metrics.sinal.hhi_contribuicao(PESOS_EXEMPLO)
+BREADTH_EXEMPLO = 1 / HHI_EXEMPLO
 
 
 def _br(texto: str) -> str:
@@ -159,20 +176,35 @@ def post_001():
                     f"O percentil 95 das trajetórias exige {_pct(float(np.quantile(mdds, .05)), 0)}. "
                     "É este o número que dimensiona posição.",
             rodape=FONTE_PADRAO),
-        cards.conceito(
-            "O que a linha mediana não é",
-            "Ela não é previsão, nem cenário central, nem expectativa. É o centro "
-            "de uma distribuição de trajetórias — e metade delas fica abaixo.\n\n"
-            "O erro operacional que decorre de ignorar isso é específico e caro: "
-            "dimensionar posição pelo drawdown observado em vez do simulado.",
+        cards.codigo(
+            "A distribuição inteira, em seis linhas",
+            ["from wizzlab import data, metrics",
+             "",
+             "est = data.gerar_estrategia(semente=42)",
+             "r = est.trades.r_multiple.values",
+             "",
+             "# reamostra e devolve os percentis do MDD",
+             "print(metrics.risco.monte_carlo_mdd(r))"],
+            saida=[f"P50    {_num(float(MC_MDD['P50']), 3)}",
+                   f"P95    {_num(float(MC_MDD['P95']), 3)}",
+                   f"P99    {_num(float(MC_MDD['P99']), 3)}"],
+            serie="concept",
+            leitura="P95 é o drawdown que a estratégia pode exigir sem que nada "
+                    "tenha mudado na premissa. É ele que entra no sizing.",
+            rodape=f"Roda no Colab sem instalar nada · {REPO}"),
+        cards.em_aberto(
+            "O que este post não resolve",
+            ["A reamostragem iid apaga a dependência temporal. Com bootstrap "
+             "por blocos, quanto a banda alarga?",
+             "Qual fração f maximiza o crescimento sem estourar o drawdown que "
+             "você tolera de fato?",
+             "Quantas operações seriam necessárias para o intervalo do edge "
+             "não cruzar o zero?"],
             "concept",
-            destaque="A pergunta de dimensionamento não é quanto a estratégia caiu. "
-                     "É quanto ela pode cair sem que a premissa tenha mudado.",
-            rodape="Politis & Romano (1994) · Manual de Validação, Apêndice B"),
-        cards.fechamento(
-            "O backtest é uma amostra. Trate-o como tal.", "portfolio",
-            chamada=CHAMADA_CODIGO,
-            transparencia=TRANSPARENCIA),
+            proximo="As três são calculáveis com o que já está no repositório: "
+                    "stationary_bootstrap, kelly_fraction e "
+                    "min_track_record_length.",
+            rodape=f"Politis & Romano (1994) · {REPO}"),
     ]
 
 
@@ -259,20 +291,37 @@ def post_002():
                     "tempo. Diferente do drawdown máximo, ele penaliza permanecer "
                     "abaixo do pico — não apenas afundar uma vez.",
             rodape="Martin & McCann · Manual de Validação, métrica 24"),
-        cards.conceito(
-            "Por que isto não é um detalhe técnico",
-            "Volatilidade e drawdown medem coisas diferentes. A carteira B tem "
-            "volatilidade 3,2× maior, mas queda máxima 6,0× maior — porque parte do "
-            "risco dela está concentrado em um episódio, não distribuído.\n\n"
-            "É a diferença entre oscilar e quebrar.",
+        cards.codigo(
+            "As duas carteiras, medidas",
+            ["from wizzlab import data, metrics as m",
+             "",
+             "par = data.gerar_par_comparavel()",
+             "",
+             "for c in ('A', 'B'):",
+             "    s = par[c]",
+             "    print(c, m.risco.ulcer_index(s),",
+             "             m.risco.calmar(s))"],
+            saida=[f"A   {_num(met['A']['ulcer'], 3)}   {_num(met['A']['calmar'])}",
+                   f"B   {_num(met['B']['ulcer'], 3)}   {_num(met['B']['calmar'])}"],
+            serie="concept",
+            leitura=f"Volatilidade {_num(met['B']['vol'] / met['A']['vol'], 1)}× "
+                    f"maior, mas queda máxima "
+                    f"{_num(met['B']['mdd'] / met['A']['mdd'], 1)}× maior. A "
+                    "diferença entre os dois múltiplos indica risco concentrado "
+                    "em um episódio, não distribuído.",
+            rodape=f"Roda no Colab sem instalar nada · {REPO}"),
+        cards.em_aberto(
+            "O que este post não resolve",
+            ["Em que condições Ulcer Index e Calmar discordam sobre qual "
+             "carteira é pior?",
+             "Profundidade ou duração: qual prevê melhor o abandono de uma "
+             "estratégia por quem a opera?",
+             "Com que frequência duas carteiras de mesmo retorno diferem por "
+             "acaso, e não por estrutura?"],
             "concept",
-            destaque="Um ranking por rentabilidade coloca A e B empatadas. "
-                     "Qualquer investidor real as distingue em uma semana.",
-            rodape="Ver também: assimetria (métrica 11) e Expected Shortfall (35)"),
-        cards.fechamento(
-            "Retorno é o numerador. Sozinho, não é resultado.", "portfolio",
-            chamada=CHAMADA_CODIGO,
-            transparencia=TRANSPARENCIA),
+            proximo="A terceira exige simulação, e é a que separa diagnóstico de "
+                    "narrativa. Notebook 2 do repositório.",
+            rodape=f"Martin & McCann · {REPO}"),
     ]
 
 
@@ -344,20 +393,33 @@ def post_003():
             destaque="Posições serão divulgadas em peso percentual. Valores "
                      "absolutos são opcionais e irrelevantes para o argumento.",
             rodape="Conteúdo educacional · não constitui recomendação"),
-        cards.conceito(
-            "O critério de invalidação",
-            "Toda tese publicada aqui virá acompanhada da frase que a derruba: "
-            "o fato específico que, se ocorrer, encerra a posição.\n\n"
-            "Sem esse campo preenchido antes, qualquer resultado adverso pode ser "
-            "reinterpretado como paciência.",
+        cards.codigo(
+            "Como a concentração será medida",
+            ["from wizzlab import metrics",
+             "",
+             "# pesos da carteira, em fração do total",
+             "w = [.28, .22, .18, .14, .10, .08]",
+             "",
+             "h = metrics.sinal.hhi_contribuicao(w)",
+             "print(h, 1 / h)"],
+            saida=[f"HHI          {_num(float(HHI_EXEMPLO), 3)}",
+                   f"nº efetivo   {_num(float(BREADTH_EXEMPLO))}"],
+            serie="portfolio",
+            leitura="Seis posições nesses pesos equivalem a "
+                    f"{_num(float(BREADTH_EXEMPLO))} apostas independentes. É esse "
+                    "número que será publicado, não a contagem de tickers.",
+            rodape=f"Métricas 106 e 107 · {REPO}"),
+        cards.em_aberto(
+            "O que ainda não está definido",
+            ["Qual concentração é alta demais? HHI de 0,25 e seis posições "
+             "dizem a mesma coisa?",
+             "Quanto giro anual o edge desta carteira suporta antes de zerar?",
+             "Que evidência encerraria a carteira inteira, e não apenas uma "
+             "posição?"],
             "portfolio",
-            destaque="Erro de processo e resultado adverso são coisas distintas. "
-                     "Os dois serão reportados, e separadamente.",
-            rodape="Manual de Validação · métrica 145, kill-switch ex ante"),
-        cards.fechamento(
-            "Premissas abertas. Riscos explícitos.", "portfolio",
-            chamada=CHAMADA_CODIGO,
-            transparencia=TRANSPARENCIA),
+            proximo="A segunda tem resposta em uma linha — break_even_cost. A "
+                    "terceira será publicada antes da primeira compra.",
+            rodape=f"Métrica 145, kill-switch ex ante · {REPO}"),
     ]
 
 
@@ -433,22 +495,35 @@ def post_004():
                     f"fica mais concreta: uma queda de 70% consome "
                     f"{_num(float(anos[6]), 1)} anos de capitalização.",
             rodape=FONTE_PADRAO),
-        cards.conceito(
-            "A consequência para dimensionamento",
-            "Se a exigência de recuperação cresce mais rápido que a perda, então "
-            "limitar a perda máxima vale mais, em valor esperado de longo prazo, "
-            "do que aumentar o retorno esperado por operação.\n\n"
-            "É o mesmo resultado que o critério de Kelly formaliza: existe uma "
-            "fração de capital acima da qual o crescimento logarítmico esperado "
-            "começa a cair, mesmo com edge positivo.",
+        cards.codigo(
+            "A tabela inteira, em três linhas",
+            ["import numpy as np",
+             "",
+             "q = np.array([.10, .30, .50, .70])",
+             "g = q / (1 - q)              # alta exigida",
+             "t = np.log(1/(1-q)) / np.log(1.10)   # anos",
+             "",
+             "print(np.c_[q, g, t].round(2))"],
+            saida=[_br(f"0.10   {necessario[0]:.2f}    {anos[0]:.2f}"),
+                   _br(f"0.30   {necessario[2]:.2f}    {anos[2]:.2f}"),
+                   _br(f"0.50   {necessario[4]:.2f}    {anos[4]:.2f}"),
+                   _br(f"0.70   {necessario[6]:.2f}   {anos[6]:.2f}")],
+            serie="data",
+            leitura="Terceira coluna: anos de retorno a 10% a.a. consumidos "
+                    "apenas para voltar ao ponto de partida.",
+            rodape=f"Roda no Colab sem instalar nada · {REPO}"),
+        cards.em_aberto(
+            "O que este post não resolve",
+            ["Se limitar a perda custa retorno esperado, onde fica o ponto de "
+             "equilíbrio?",
+             "Kelly indica que fração para esta distribuição — e por que quase "
+             "ninguém opera Kelly cheio?",
+             "A convexidade muda quando há aportes recorrentes ao longo da "
+             "queda?"],
             "data",
-            destaque="Sobrevivência não é conservadorismo. É a condição para que a "
-                     "capitalização tenha horizonte para operar.",
-            rodape="Manual de Validação · métricas 38 e 39"),
-        cards.fechamento(
-            "A perda e a recuperação não são simétricas.", "portfolio",
-            chamada=CHAMADA_CODIGO,
-            transparencia=TRANSPARENCIA),
+            proximo="As duas primeiras estão em metrics.risco — kelly_fraction e "
+                    "risk_of_ruin. A terceira eu ainda não medi.",
+            rodape=f"Métricas 38 e 39 · {REPO}"),
     ]
 
 
@@ -539,22 +614,38 @@ def post_005():
                     "o que sobra do edge. É o teste mais direto de dependência de "
                     "eventos.",
             rodape="wizzlab.metrics.sinal.remove_best_trades()"),
-        cards.conceito(
-            "Isto é defeito?",
-            "Não necessariamente. Convexidade é uma estrutura legítima, e sistemas "
-            "seguidores de tendência exibem exatamente este perfil.\n\n"
-            "O problema não é depender da cauda. É depender dela sem ter declarado "
-            "— porque aí o dimensionamento, a expectativa de frequência e a "
-            "tolerância a sequências negativas foram todos calibrados no número "
-            "errado.",
+        cards.codigo(
+            "Rode o teste de remoção",
+            ["from wizzlab import data, metrics",
+             "",
+             "est = data.gerar_estrategia(semente=42)",
+             "r = est.trades.r_multiple.values",
+             "",
+             "# tira as 5 melhores de 420 operações",
+             "print(metrics.sinal.remove_best_trades(r, 5))"],
+            saida=[f"expectancy original   {_num(float(SEM_TOP5.iloc[0]), 3)}",
+                   f"sem as 5 melhores     {_num(float(SEM_TOP5.iloc[1]), 3)}",
+                   f"ainda positiva        {SEM_TOP5.iloc[2]}"],
+            serie="research",
+            leitura="Remover 1,2% da amostra corta a expectancy em "
+                    f"{_num((1 - float(SEM_TOP5.iloc[1]) / float(SEM_TOP5.iloc[0])) * 100, 0)}%. "
+                    "Permanece positiva, mas a margem sobre o custo desaparece.",
+            rodape=f"Roda no Colab sem instalar nada · {REPO}"),
+        cards.referencias(
+            "De onde vem o método",
+            [("Bailey, D. H.; López de Prado, M. (2014). The Deflated Sharpe "
+              "Ratio: correcting for selection bias and non-normality.",
+              "J. Portfolio Management 40(5) · doi 10.3905/jpm.2014.40.5.094"),
+             ("Lo, A. W. (2002). The Statistics of Sharpe Ratios.",
+              "Financial Analysts Journal 58(4) · doi 10.2469/faj.v58.n4.2453"),
+             ("Politis, D. N.; Romano, J. P. (1994). The Stationary Bootstrap.",
+              "J. Am. Stat. Assoc. 89(428) · doi 10.1080/01621459.1994.10476870")],
             "research",
-            destaque="Média positiva com mediana negativa é uma decisão de projeto. "
-                     "Quando é descoberta depois, foi um acidente.",
-            rodape="Leia junto: PnL concentration (103) e Remove Best Trades (104)"),
-        cards.fechamento(
-            "O resumo de uma distribuição não é a distribuição.", "portfolio",
-            chamada=CHAMADA_CODIGO,
-            transparencia=TRANSPARENCIA),
+            leitura="Convexidade é uma estrutura legítima — sistemas seguidores "
+                    "de tendência exibem este perfil por projeto. O que a "
+                    "literatura cobra é que esteja declarado antes, não "
+                    "descoberto depois.",
+            rodape=f"Bibliografia completa no repositório · {REPO}"),
     ]
 
 
@@ -633,20 +724,36 @@ def post_006():
                      "a série recalculada nos dois critérios.",
             rodape="Data-snooping por escolha de janela é a forma mais comum, e a "
                    "menos discutida"),
-        cards.conceito(
-            "Por que uma régua pobre é melhor que uma ótima",
-            "Quatro métricas fixas, repetidas sem alteração, produzem uma série "
-            "comparável ao longo do tempo. Um painel sofisticado que muda a cada "
-            "trimestre não produz nada — exceto a impressão de rigor.\n\n"
-            "A repetição é o método.",
+        cards.codigo(
+            "O excesso, com o erro-padrão junto",
+            ["from wizzlab import data, metrics",
+             "",
+             "est = data.gerar_estrategia(semente=42)",
+             "ref = data.gerar_benchmark(est)",
+             "",
+             "print(metrics.execucao.beta_e_alfa(",
+             "    est.diario.values, ref.values))"],
+            saida=[f"excesso/período   {_num(float(REG['excesso_por_periodo']), 4)}",
+                   f"t do excesso      {_num(float(REG['t_excesso']))}",
+                   f"beta              {_num(float(REG['beta']))}",
+                   f"R quadrado        {_num(float(REG['r2']))}"],
+            serie="portfolio",
+            leitura=f"t = {_num(float(REG['t_excesso']))} não passa de 2. O excesso "
+                    "não é distinguível de zero, e será reportado assim — com o t, "
+                    "não apenas com o ponto.",
+            rodape=f"Métricas 150 e 151 · {REPO}"),
+        cards.em_aberto(
+            "O que esta régua ainda não responde",
+            ["Contra que referência? Índice amplo e cesta setorial podem dar "
+             "sinais opostos para a mesma carteira.",
+             "Com que amostra o t do excesso passaria de 2, mantendo o mesmo "
+             "excesso por período?",
+             "Quanto do beta é escolha e quanto é consequência do universo "
+             "elegível?"],
             "portfolio",
-            destaque="O valor do histórico está na consistência da medida, não na "
-                     "sofisticação dela.",
-            rodape="Manual de Marca Wizz V2 · seção 8"),
-        cards.fechamento(
-            "A mesma régua, sempre.", "portfolio",
-            chamada=CHAMADA_CODIGO,
-            transparencia=TRANSPARENCIA),
+            proximo="A primeira é o post da semana 18. A segunda é o Minimum "
+                    "Track Record Length, métrica 47.",
+            rodape=f"Conteúdo educacional · {REPO}"),
     ]
 
 
