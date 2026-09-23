@@ -1,7 +1,7 @@
 [
   {
     "slug": "post-001-incerteza",
-    "titulo": "Investir não é prever. É decidir sob incerteza.",
+    "titulo": "Dispersão do capital final sob reamostragem de trajetórias",
     "serie": "Concept",
     "semana": 1,
     "dia": "Terça",
@@ -18,7 +18,7 @@
   },
   {
     "slug": "post-002-duas-carteiras",
-    "titulo": "Duas carteiras renderam 15%. Qual foi melhor?",
+    "titulo": "Duas séries com retorno acumulado idêntico e risco distinto",
     "serie": "Concept",
     "semana": 1,
     "dia": "Quinta",
@@ -35,7 +35,7 @@
   },
   {
     "slug": "post-003-regras",
-    "titulo": "Wizz Portfolio — as regras antes da primeira posição",
+    "titulo": "Critérios de medição da carteira, definidos antes da primeira posição",
     "serie": "Portfolio",
     "semana": 1,
     "dia": "Domingo",
@@ -52,7 +52,7 @@
   },
   {
     "slug": "post-004-assimetria",
-    "titulo": "Perdeu 50%? Ganhar 50% não leva você de volta.",
+    "titulo": "Relação entre queda percentual e alta necessária para recuperação",
     "serie": "Data",
     "semana": 2,
     "dia": "Terça",
@@ -69,7 +69,7 @@
   },
   {
     "slug": "post-005-media-engana",
-    "titulo": "Por que a média de retorno pode enganar?",
+    "titulo": "Média e mediana dos resultados em uma amostra de 420 operações",
     "serie": "Research",
     "semana": 2,
     "dia": "Quinta",
@@ -86,7 +86,7 @@
   },
   {
     "slug": "post-006-medir",
-    "titulo": "Wizz Portfolio — como vamos medir desempenho",
+    "titulo": "Régua de medição: quatro métricas, mesma referência, mesmo período",
     "serie": "Portfolio",
     "semana": 2,
     "dia": "Domingo",

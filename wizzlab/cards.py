@@ -6,7 +6,13 @@ intocável -- são **direção de produção**.
 
 A lógica que precisa permanecer, segundo o brand kit:
 
-    label pequeno + linha cobre + pergunta forte + um único elemento explicativo.
+    label pequeno + linha cobre + um único elemento explicativo por card.
+
+O registro do texto é o da nota técnica: título descritivo, legenda que declara
+método e parâmetros, sem imperativo, sem segunda pessoa e sem a construção
+"X não é Y, é Z". Os formatos que carregam conteúdo -- :func:`formula`,
+:func:`tabela`, :func:`codigo`, :func:`referencias` -- existem para ocupar o
+lugar que, de outro modo, o aforismo ocuparia.
 
 Cinco papéis editoriais, mesma grade e mesma tipografia:
 
@@ -140,14 +146,19 @@ def _texto_ajustado(fig: Figure, texto: str, x: float, y: float, *,
 
 
 # --- capa --------------------------------------------------------------------
-def capa(pergunta: str, serie: str = "concept", apoio: str = "",
+def capa(titulo: str, serie: str = "concept", apoio: str = "",
          numero: str = "", figura_fn=None) -> Figure:
-    """Card de abertura: a pergunta que o post responde.
+    """Card de abertura: o objeto medido e os valores principais.
 
-    O manual de marca pede títulos de curiosidade e clareza -- "O que precisa
-    acontecer para esta empresa valer X?" -- e proíbe urgência artificial.
-    Por isso o parâmetro se chama ``pergunta``, não ``manchete``.
+    O título é um rótulo descritivo, no registro de título de nota técnica --
+    "Dispersão do capital final sob reamostragem de trajetórias". Não é gancho,
+    não é pergunta retórica e não monta contraste para chocar.
+
+    ``apoio`` carrega o método e os números: n, semente, parâmetros e os
+    valores que o post examina. É ele que permite a alguém decidir, no primeiro
+    card, se o assunto interessa.
     """
+    pergunta = titulo
     fig, estilo = _base(serie)
     titulo_f, texto_f = _fontes()
 
@@ -202,7 +213,7 @@ def conceito(titulo: str, corpo: str, serie: str = "concept",
                  linespacing=1.5, fontweight="semibold")
 
     if rodape:
-        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 74), fontsize=11,
                  color=estilo.meta, family=texto_f, va="top", linespacing=1.5)
     return fig
 
@@ -228,7 +239,7 @@ def numero(valor: str, legenda: str, serie: str = "data", contexto: str = "",
         fig.text(MARGEM, 0.315, _quebrar(contexto, 46), fontsize=16,
                  color=estilo.meta, family=texto_f, va="top", linespacing=1.55)
     if rodape:
-        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 74), fontsize=11,
                  color=estilo.meta, family=texto_f, va="top")
     return fig
 
@@ -274,7 +285,7 @@ def grafico(titulo: str, figura_fn, serie: str = "data", leitura: str = "",
         fig.text(MARGEM, 0.255, _quebrar(leitura, 50), fontsize=15.5,
                  color=estilo.tinta, family=texto_f, va="top", linespacing=1.55)
     if rodape:
-        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 74), fontsize=11,
                  color=estilo.meta, family=texto_f, va="top")
     return fig
 
@@ -351,7 +362,7 @@ def formula(titulo: str, expressao: str, termos: list[tuple[str, str]] | None = 
                  fontsize=15.5, color=estilo.tinta, family=texto_f, va="top",
                  linespacing=1.55)
     if rodape:
-        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 74), fontsize=11,
                  color=estilo.meta, family=texto_f, va="top")
     return fig
 
@@ -415,7 +426,7 @@ def tabela(titulo: str, cabecalho: tuple[str, ...], linhas: list[tuple],
                  fontsize=15.5, color=estilo.tinta, family=texto_f, va="top",
                  linespacing=1.55)
     if rodape:
-        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 74), fontsize=11,
                  color=estilo.meta, family=texto_f, va="top")
     return fig
 
@@ -481,7 +492,7 @@ def codigo(titulo: str, linhas: list[str], saida: list[str] | None = None,
         fig.text(MARGEM, baixo - 0.030, _quebrar(leitura, 50), fontsize=15.5,
                  color=estilo.tinta, family=texto_f, va="top", linespacing=1.55)
     if rodape:
-        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 74), fontsize=11,
                  color=estilo.meta, family=texto_f, va="top")
     return fig
 
@@ -526,7 +537,7 @@ def referencias(titulo: str, itens: list[tuple[str, str]],
                  fontsize=15, color=estilo.tinta, family=texto_f, va="top",
                  linespacing=1.55)
     if rodape:
-        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 74), fontsize=11,
                  color=estilo.meta, family=texto_f, va="top")
     return fig
 
@@ -567,7 +578,7 @@ def em_aberto(titulo: str, questoes: list[str], serie: str = "research",
         fig.text(MARGEM, 0.230, _quebrar(proximo, 52), fontsize=14,
                  color=estilo.tinta, family=texto_f, va="top", linespacing=1.5)
     if rodape:
-        fig.text(MARGEM, 0.115, _quebrar(rodape, 62), fontsize=11,
+        fig.text(MARGEM, 0.115, _quebrar(rodape, 74), fontsize=11,
                  color=estilo.meta, family=texto_f, va="top")
     return fig
 
