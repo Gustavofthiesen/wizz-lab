@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "post-007-excesso-por-janela",
+    "titulo": "Excesso ajustado por risco, por janela, com intervalo de confiança",
+    "serie": "Research",
+    "n_cards": 7,
+    "arquivos": [
+      "post-007-excesso-por-janela-01.png",
+      "post-007-excesso-por-janela-02.png",
+      "post-007-excesso-por-janela-03.png",
+      "post-007-excesso-por-janela-04.png",
+      "post-007-excesso-por-janela-05.png",
+      "post-007-excesso-por-janela-06.png",
+      "post-007-excesso-por-janela-07.png"
+    ]
+  },
+  {
+    "slug": "post-008-pbo-e-placebo",
+    "titulo": "Probabilidade de overfitting na escolha da configuração",
+    "serie": "Research",
+    "n_cards": 7,
+    "arquivos": [
+      "post-008-pbo-e-placebo-01.png",
+      "post-008-pbo-e-placebo-02.png",
+      "post-008-pbo-e-placebo-03.png",
+      "post-008-pbo-e-placebo-04.png",
+      "post-008-pbo-e-placebo-05.png",
+      "post-008-pbo-e-placebo-06.png",
+      "post-008-pbo-e-placebo-07.png"
+    ]
+  }
+]
