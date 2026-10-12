@@ -68,6 +68,18 @@ ESTILOS: dict[str, EstiloSerie] = {
                              brand.TEXTO_METADADO_ESCURO, brand.COBRE),
     "note": EstiloSerie("WIZZ NOTE", brand.MARFIM, brand.AZUL_PETROLEO,
                         brand.CINZA_SALVIA, brand.CINZA_SALVIA),
+
+    # --- os dois trilhos em uso -------------------------------------------
+    # O programa editorial tem duas faixas, e so duas. Tudo que e ensinado
+    # sobre como avaliar um portfolio e "metrica"; tudo que e resultado
+    # medido da carteira e "resultado". A separacao visual e deliberada:
+    # claro ensina, escuro presta contas.
+    "metrica": EstiloSerie("WIZZ  ·  MÉTRICAS", brand.MARFIM,
+                           brand.AZUL_PETROLEO, brand.CINZA_SALVIA,
+                           brand.VERDE_FLORESTA),
+    "resultado": EstiloSerie("WIZZ  ·  RESULTADOS", brand.AZUL_PETROLEO,
+                             brand.MARFIM, brand.TEXTO_METADADO_ESCURO,
+                             brand.COBRE),
 }
 
 
@@ -205,7 +217,7 @@ def conceito(titulo: str, corpo: str, serie: str = "concept",
         fig.patches.append(plt.Rectangle(
             (MARGEM, 0.245), 1 - 2 * MARGEM, altura,
             transform=fig.transFigure, facecolor=brand.SUPERFICIE_SUTIL
-            if serie != "portfolio" else "#1B3B39", edgecolor="none", zorder=0))
+            if serie not in ("portfolio", "resultado") else "#1B3B39", edgecolor="none", zorder=0))
         fig.add_artist(plt.Line2D([MARGEM, MARGEM], [0.245, topo],
                                   color=estilo.acento, linewidth=4.5))
         fig.text(MARGEM + 0.028, topo - 0.028, linhas, fontsize=16,
@@ -276,7 +288,7 @@ def grafico(titulo: str, figura_fn, serie: str = "data", leitura: str = "",
         ax.spines[lado].set_visible(False)
     ax.spines["bottom"].set_color(estilo.meta)
     ax.tick_params(colors=estilo.meta, labelsize=11, length=0)
-    ax.grid(True, axis="y", color=brand.LINHA_SUTIL if serie != "portfolio"
+    ax.grid(True, axis="y", color=brand.LINHA_SUTIL if serie not in ("portfolio", "resultado")
             else "#1E3C3A", linewidth=0.9)
     ax.set_axisbelow(True)
     figura_fn(ax)
@@ -344,7 +356,7 @@ def formula(titulo: str, expressao: str, termos: list[tuple[str, str]] | None = 
     fig.patches.append(plt.Rectangle(
         (MARGEM, faixa_baixo), 1 - 2 * MARGEM, faixa_alto - faixa_baixo,
         transform=fig.transFigure,
-        facecolor=brand.SUPERFICIE_SUTIL if serie != "portfolio" else "#1B3B39",
+        facecolor=brand.SUPERFICIE_SUTIL if serie not in ("portfolio", "resultado") else "#1B3B39",
         edgecolor="none", zorder=0))
     fig.text(0.5, (faixa_baixo + faixa_alto) / 2, f"${expressao}$",
              fontsize=34, color=estilo.tinta, ha="center", va="center")
@@ -460,7 +472,7 @@ def codigo(titulo: str, linhas: list[str], saida: list[str] | None = None,
                     cor=estilo.tinta, peso="heavy", va="top",
                     linespacing=1.18, min_tamanho=18)
 
-    fundo_bloco = brand.SUPERFICIE_SUTIL if serie != "portfolio" else "#1B3B39"
+    fundo_bloco = brand.SUPERFICIE_SUTIL if serie not in ("portfolio", "resultado") else "#1B3B39"
     altura_linha = 0.030
     n = len(linhas) + (len(saida) + 1 if saida else 0)
     topo = 0.760

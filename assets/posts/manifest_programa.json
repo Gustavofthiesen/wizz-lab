@@ -1,0 +1,80 @@
+[
+  {
+    "trilho": "metricas",
+    "slug": "m01-cagr",
+    "titulo": "Retorno composto anual (CAGR)",
+    "n_cards": 5,
+    "arquivos": [
+      "m01-cagr-01.png",
+      "m01-cagr-02.png",
+      "m01-cagr-03.png",
+      "m01-cagr-04.png",
+      "m01-cagr-05.png"
+    ]
+  },
+  {
+    "trilho": "metricas",
+    "slug": "m02-drawdown",
+    "titulo": "Drawdown: profundidade, duração e persistência",
+    "n_cards": 5,
+    "arquivos": [
+      "m02-drawdown-01.png",
+      "m02-drawdown-02.png",
+      "m02-drawdown-03.png",
+      "m02-drawdown-04.png",
+      "m02-drawdown-05.png"
+    ]
+  },
+  {
+    "trilho": "metricas",
+    "slug": "m03-sharpe",
+    "titulo": "Sharpe, Sortino e Calmar: três denominadores de risco",
+    "n_cards": 5,
+    "arquivos": [
+      "m03-sharpe-01.png",
+      "m03-sharpe-02.png",
+      "m03-sharpe-03.png",
+      "m03-sharpe-04.png",
+      "m03-sharpe-05.png"
+    ]
+  },
+  {
+    "trilho": "metricas",
+    "slug": "m04-excesso",
+    "titulo": "Excesso ajustado por risco e beta",
+    "n_cards": 5,
+    "arquivos": [
+      "m04-excesso-01.png",
+      "m04-excesso-02.png",
+      "m04-excesso-03.png",
+      "m04-excesso-04.png",
+      "m04-excesso-05.png"
+    ]
+  },
+  {
+    "trilho": "resultados",
+    "slug": "r01-por-janela",
+    "titulo": "Resultado da carteira, janela a janela",
+    "n_cards": 5,
+    "arquivos": [
+      "r01-por-janela-01.png",
+      "r01-por-janela-02.png",
+      "r01-por-janela-03.png",
+      "r01-por-janela-04.png",
+      "r01-por-janela-05.png"
+    ]
+  },
+  {
+    "trilho": "resultados",
+    "slug": "r02-ressalvas",
+    "titulo": "O que estes números não dizem",
+    "n_cards": 5,
+    "arquivos": [
+      "r02-ressalvas-01.png",
+      "r02-ressalvas-02.png",
+      "r02-ressalvas-03.png",
+      "r02-ressalvas-04.png",
+      "r02-ressalvas-05.png"
+    ]
+  }
+]

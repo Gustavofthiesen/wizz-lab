@@ -1,5 +1,0 @@
-faixa,desconto_min,desconto_max,observacoes,prometido,realizado_24m,preco_final_sobre_p50
-0 a 12%,0.00,0.12,398,0.055,0.246,1.173
-12 a 30%,0.12,0.30,449,0.210,0.167,0.973
-30 a 60%,0.30,0.60,757,0.437,0.198,0.848
-acima de 60%,0.60,,3240,1.558,0.305,0.483

@@ -1,22 +1,26 @@
 """Resultados publicados da carteira Wizz.
 
-Este módulo carrega ``data/resultados_publicados.csv``: as estatísticas
-agregadas de desempenho que foram **escolhidas para publicação**, janela a
-janela.
+Carrega ``data/resultados_publicados.csv``: as estatísticas agregadas de
+desempenho, janela a janela.
 
-O que está aqui e o que não está
---------------------------------
-Estão aqui: CAGR, CDI do período, excesso, alpha com erro-padrão e intervalo,
-beta, volatilidade, Sharpe, pior queda, caixa médio e número de posições.
+A linha entre resultado e estratégia
+------------------------------------
+Este módulo publica **resultado**. Nada aqui descreve como a carteira é
+construída.
 
-Não estão aqui, e não entram neste repositório: as regras da estratégia, os
-parâmetros do modelo de valuation, o universo elegível e as posições. A
-separação é deliberada — o que sustenta a discussão de método é o resultado
-medido, não o motor que o produziu.
+*Resultado* é o que qualquer gestor reporta: retorno, comparação com a
+referência, volatilidade, drawdown, excesso ajustado por risco com erro-padrão,
+beta, caixa médio e número de posições.
 
-A janela 2024–26 é marcada como reservada: ela não participou de nenhuma
-escolha de regra ou parâmetro. É a única cujo alpha pode ser lido sem desconto
-por seleção.
+*Estratégia* é o método de avaliação das empresas, os filtros de elegibilidade,
+a regra de dimensionamento e a de saída. **Nada disso entra neste repositório**,
+nem nos posts, nem nos nomes das colunas.
+
+A separação não é decorativa: é o que permite abrir o ferramental de métricas
+para qualquer pessoa sem abrir o que produz os números.
+
+A janela 2024–26 é marcada como reservada: não participou de nenhuma decisão de
+construção. É a única cujo excesso pode ser lido sem desconto por seleção.
 """
 from __future__ import annotations
 
@@ -25,33 +29,34 @@ import pathlib
 import pandas as pd
 
 #: Caminho do CSV publicado, relativo à raiz do repositório.
-ARQUIVO = pathlib.Path(__file__).resolve().parent.parent / "data" / "resultados_publicados.csv"
+ARQUIVO = (pathlib.Path(__file__).resolve().parent.parent
+           / "data" / "resultados_publicados.csv")
 
 #: Período coberto pela série publicada.
 PERIODO = "25/04/2017 a 11/09/2026"
 
-#: Configuração a que os números se referem.
-CONFIGURACAO = (
-    "V3 — grid por valor justo, permanência até margem de segurança de saída "
-    "de 5%, alíquota de IR zero (isenção mensal de R$ 20.000 aplicável ao porte)"
-)
-
-#: O que a série NÃO corrige. Declarado junto do número, sempre.
+#: O que a série não corrige. Declarado junto do número, sempre.
+#:
+#: Cada item descreve uma limitação da *medição*. Nenhum descreve o método que
+#: produziu os retornos.
 RESSALVAS = (
-    "Universo com viés de sobrevivência residual: das 30 empresas recuperadas "
-    "no teste, 2 passariam o portão de entrada.",
-    "Piso de ruído de recomposição de ±0,5 p.p. de CAGR e piso do cache de "
-    "valuation de ±2,4 p.p. — diferenças menores que isso não têm conteúdo.",
-    "58% do excesso do baseline é inclinação setorial, e não seleção dentro "
-    "do setor.",
-    "PBO por Sharpe medido em 0,677 sobre 43 configurações candidatas.",
+    "Resultado de simulação histórica sobre dados point-in-time, não de conta "
+    "executada. O registro ao vivo começa em 2026.",
+    "O universo histórico tem viés de sobrevivência residual: empresas que "
+    "deixaram de existir estão sub-representadas.",
+    "Diferenças de CAGR menores que ±2,4 pontos percentuais estão dentro do "
+    "piso de ruído medido por intervenções-placebo, e não têm conteúdo.",
+    "Parte relevante do excesso contra o índice amplo é exposição setorial, e "
+    "não seleção. Contra a cesta do próprio setor, o excesso é menor.",
+    "A configuração avaliada foi escolhida entre várias candidatas. A "
+    "probabilidade de overfitting na escolha foi medida e é alta — por isso a "
+    "janela reservada é a leitura que vale.",
 )
 
 
 def carregar() -> pd.DataFrame:
     """Devolve a tabela de resultados por janela, indexada pela janela."""
-    df = pd.read_csv(ARQUIVO)
-    return df.set_index("janela")
+    return pd.read_csv(ARQUIVO).set_index("janela")
 
 
 def janelas(incluir_cheia: bool = False) -> pd.DataFrame:
@@ -61,7 +66,7 @@ def janelas(incluir_cheia: bool = False) -> pd.DataFrame:
 
 
 def reservada() -> pd.Series:
-    """A janela que não participou de nenhuma escolha de regra ou parâmetro."""
+    """A janela que não participou de nenhuma decisão de construção."""
     df = carregar()
     return df[df.reservada == 1].iloc[0]
 
@@ -74,34 +79,5 @@ def amostra_cheia() -> pd.Series:
 def resumo() -> str:
     """Uma linha com o contraste que a série documenta."""
     r, c = reservada(), amostra_cheia()
-    return (f"Amostra cheia: alpha {c.alpha:+.2%} (t = {c.t_alpha:.2f}). "
-            f"Janela reservada: alpha {r.alpha:+.2%} (t = {r.t_alpha:.2f}).")
-
-
-# --- realização do P50 --------------------------------------------------------
-ARQUIVO_P50 = ARQUIVO.parent / "p50_realizacao.csv"
-
-#: O que a medição do P50 estabelece, em uma linha cada.
-P50_ACHADOS = (
-    "A inclinação do P50 contra o retorno futuro é positiva e significativa "
-    "nos três horizontes testados, com t entre 2,8 e 3,3. O indicador carrega "
-    "informação.",
-    "No horizonte de 3 anos que a estratégia supõe, 13,5% do retorno prometido "
-    "se materializa.",
-    "Como previsão do preço futuro, o P50 é de duas a três vezes pior que usar "
-    "o preço de hoje.",
-)
-
-
-def p50_realizacao() -> pd.DataFrame:
-    """Prometido contra realizado, por faixa de desconto na entrada.
-
-    Cada linha é uma faixa de margem de segurança no momento da compra. A
-    coluna ``prometido`` é o retorno implícito no P50; ``realizado_24m`` é o
-    que de fato ocorreu em 24 meses; ``preco_final_sobre_p50`` é a razão entre
-    o preço ao final do horizonte e o P50 estimado na entrada.
-
-    Valores abaixo de 1,0 na última coluna indicam que o preço não alcançou a
-    estimativa.
-    """
-    return pd.read_csv(ARQUIVO_P50).set_index("faixa")
+    return (f"Amostra cheia: excesso {c.alpha:+.2%} (t = {c.t_alpha:.2f}). "
+            f"Janela reservada: {r.alpha:+.2%} (t = {r.t_alpha:.2f}).")

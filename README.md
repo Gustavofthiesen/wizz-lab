@@ -99,24 +99,41 @@ wizzlab/
     └── execucao.py         108–153 custos, liquidez, integridade, governança
 ```
 
-## Três coisas que este repositório leva a sério
+## O programa editorial: dois trilhos
 
-**1. Dados simulados, e isso é uma escolha pedagógica.** Quando você define o processo
-gerador, sabe qual é a resposta certa e pode conferir se a métrica a encontra. O gerador
-padrão tem expectancy verdadeira de ~+0,22R e, em 420 trades, **não atinge significância**
-— que é o tamanho de amostra que a maioria dos backtests tem. Nenhum dado de carteira real
-entra aqui.
+**MÉTRICAS** — como avaliar um portfólio. Vale para qualquer carteira, não só para esta.
+Dados simulados, declarados como tais. É este o ferramental aberto.
 
-**2. O score composto tem um aviso colado nele.** Ele resume dimensões que não são
-independentes, e resumir é o que faz perder a informação que importa. Serve para
-acompanhar a própria evolução. Nunca para convencer alguém.
+**RESULTADOS** — o que esta carteira entregou. Só saída medida.
 
-**3. A paleta foi medida, não escolhida no olho.** O manual de marca proíbe cores
+```bash
+python tools/gerar_programa.py    # 6 carrosséis, 5 cards cada, 1080x1350
+```
+
+## A linha entre resultado e método
+
+Este repositório publica **resultado**, nunca **método**.
+
+| Publicado | Não publicado |
+|---|---|
+| Retorno, CAGR, CDI do período | Como as empresas são avaliadas |
+| Excesso ajustado com erro-padrão | Filtros de elegibilidade |
+| Volatilidade, drawdown, Sharpe | Regra de dimensionamento |
+| Beta, caixa médio, nº de posições | Regra de saída |
+
+A separação é o que permite abrir o ferramental de métricas para qualquer pessoa sem abrir
+o que produz os números. `wizzlab.resultados` declara isso na própria docstring.
+
+## Duas coisas que este repositório leva a sério
+
+**1. Dados simulados no trilho de métricas, e isso é uma escolha.** Quando você define o
+processo gerador, sabe qual é a resposta certa e pode conferir se a métrica a encontra. O
+gerador padrão tem expectancy verdadeira de ~+0,22R e, em 420 trades, **não atinge
+significância** — que é o tamanho de amostra que a maioria dos backtests tem.
+
+**2. A paleta foi medida, não escolhida no olho.** O manual de marca proíbe cores
 saturadas, o que limita quantas séries dá para distinguir só por cor. A consequência está
-implementada: **duas séries por cor, no máximo**, sempre com rótulo direto, e sálvia
-reservado para grade e metadado. `palette_check.py` roda as verificações (banda de
-luminosidade, piso de croma, separação para daltonismo, contraste) e documenta o desvio
-que a marca impõe.
+implementada: **duas séries por cor, no máximo**, sempre com rótulo direto.
 
 ```bash
 python -m wizzlab.palette_check "#2F5D50,#B66A3C" --surface "#F3EFE5" --pairs all
