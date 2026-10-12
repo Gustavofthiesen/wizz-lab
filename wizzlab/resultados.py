@@ -76,3 +76,32 @@ def resumo() -> str:
     r, c = reservada(), amostra_cheia()
     return (f"Amostra cheia: alpha {c.alpha:+.2%} (t = {c.t_alpha:.2f}). "
             f"Janela reservada: alpha {r.alpha:+.2%} (t = {r.t_alpha:.2f}).")
+
+
+# --- realização do P50 --------------------------------------------------------
+ARQUIVO_P50 = ARQUIVO.parent / "p50_realizacao.csv"
+
+#: O que a medição do P50 estabelece, em uma linha cada.
+P50_ACHADOS = (
+    "A inclinação do P50 contra o retorno futuro é positiva e significativa "
+    "nos três horizontes testados, com t entre 2,8 e 3,3. O indicador carrega "
+    "informação.",
+    "No horizonte de 3 anos que a estratégia supõe, 13,5% do retorno prometido "
+    "se materializa.",
+    "Como previsão do preço futuro, o P50 é de duas a três vezes pior que usar "
+    "o preço de hoje.",
+)
+
+
+def p50_realizacao() -> pd.DataFrame:
+    """Prometido contra realizado, por faixa de desconto na entrada.
+
+    Cada linha é uma faixa de margem de segurança no momento da compra. A
+    coluna ``prometido`` é o retorno implícito no P50; ``realizado_24m`` é o
+    que de fato ocorreu em 24 meses; ``preco_final_sobre_p50`` é a razão entre
+    o preço ao final do horizonte e o P50 estimado na entrada.
+
+    Valores abaixo de 1,0 na última coluna indicam que o preço não alcançou a
+    estimativa.
+    """
+    return pd.read_csv(ARQUIVO_P50).set_index("faixa")

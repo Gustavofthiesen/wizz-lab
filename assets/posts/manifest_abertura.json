@@ -1,0 +1,32 @@
+[
+  {
+    "slug": "post-000-abertura",
+    "titulo": "O que este perfil publica",
+    "serie": "Note",
+    "n_cards": 7,
+    "arquivos": [
+      "post-000-abertura-01.png",
+      "post-000-abertura-02.png",
+      "post-000-abertura-03.png",
+      "post-000-abertura-04.png",
+      "post-000-abertura-05.png",
+      "post-000-abertura-06.png",
+      "post-000-abertura-07.png"
+    ]
+  },
+  {
+    "slug": "post-009-p50-realizacao",
+    "titulo": "Realização do P50: o prometido contra o ocorrido em 24 meses",
+    "serie": "Research",
+    "n_cards": 7,
+    "arquivos": [
+      "post-009-p50-realizacao-01.png",
+      "post-009-p50-realizacao-02.png",
+      "post-009-p50-realizacao-03.png",
+      "post-009-p50-realizacao-04.png",
+      "post-009-p50-realizacao-05.png",
+      "post-009-p50-realizacao-06.png",
+      "post-009-p50-realizacao-07.png"
+    ]
+  }
+]
