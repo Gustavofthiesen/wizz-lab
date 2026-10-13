@@ -110,7 +110,7 @@ def main() -> None:
     DESTINO.mkdir(parents=True, exist_ok=True)
     fig = montar(posicoes, caixa, args.data)
     print(pathlib.Path(cards.salvar(
-        fig, str(DESTINO / "r03-carteira-01.png"))).name)
+        fig, str(DESTINO / "rc-carteira-01.png"))).name)
 
 
 if __name__ == "__main__":
