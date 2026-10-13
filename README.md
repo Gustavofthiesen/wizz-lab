@@ -107,8 +107,19 @@ Dados simulados, declarados como tais. É este o ferramental aberto.
 **RESULTADOS** — o que esta carteira entregou. Só saída medida.
 
 ```bash
-python tools/gerar_programa.py    # 6 carrosséis, 5 cards cada, 1080x1350
+python tools/gerar_programa.py    # 7 carrosséis, 5 cards cada, 1080x1350
+python tools/gerar_carteira.py    # card de composição (ver abaixo)
+python tools/gerar_perfil.py      # avatar e capas de destaque
 ```
+
+O card de composição lê `data/carteira_publicada.csv`, que tem exatamente três
+colunas — `ticker,nota,peso` — e nada mais. A fronteira é física de propósito:
+o arquivo de alocação do motor privado tem 74 colunas e a maioria é método.
+`cards.carteira` ainda recusa qualquer rótulo que contenha termo de método, mas
+essa é a segunda barreira, não a primeira. Sem o CSV, `--exemplo` renderiza o
+layout com tickers fictícios.
+
+O texto do perfil está em **[docs/PERFIL.md](docs/PERFIL.md)**.
 
 ## A linha entre resultado e método
 

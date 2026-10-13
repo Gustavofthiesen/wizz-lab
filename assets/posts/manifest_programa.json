@@ -53,6 +53,19 @@
   },
   {
     "trilho": "resultados",
+    "slug": "r00-abertura",
+    "titulo": "O que esta conta publica",
+    "n_cards": 5,
+    "arquivos": [
+      "r00-abertura-01.png",
+      "r00-abertura-02.png",
+      "r00-abertura-03.png",
+      "r00-abertura-04.png",
+      "r00-abertura-05.png"
+    ]
+  },
+  {
+    "trilho": "resultados",
     "slug": "r01-por-janela",
     "titulo": "Resultado da carteira, janela a janela",
     "n_cards": 5,

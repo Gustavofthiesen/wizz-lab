@@ -393,6 +393,84 @@ def m04_excesso():
 # =============================================================================
 # TRILHO B — RESULTADOS DA CARTEIRA
 # =============================================================================
+#: As três janelas que participaram da construção. A reservada fica de fora.
+_CONSTR = JAN.loc[["2017-19", "2020-21", "2022-23"]]
+
+
+def r00_abertura():
+    """Post de abertura: o que esta conta é, com a medição desconfortável.
+
+    A medição que incomoda entra no card 3, não no sexto mês. Abrir com o
+    excesso da amostra cheia e só depois revelar que a janela reservada não
+    rejeita o zero seria construir uma expectativa para desmontar mais tarde;
+    o público que esta conta quer é justamente o que descontaria isso sozinho.
+    """
+    return [
+        cards.capa(
+            "O que esta conta publica",
+            "resultado", numero="ABERTURA",
+            apoio="Duas coisas, e só: como se avalia um portfólio, com o "
+                  "código aberto; e o que esta carteira entregou, medido do "
+                  "mesmo jeito que se cobraria de qualquer outra."),
+        cards.tabela(
+            "Dois trilhos",
+            ("Trilho", "O que é", "Dado"),
+            [("Métricas", "como avaliar", "simulado"),
+             ("Resultados", "o que entregou", "carteira real")],
+            "resultado",
+            leitura="O trilho de métricas usa série simulada de propósito: "
+                    "quando se define o processo gerador, sabe-se qual é a "
+                    "resposta certa e dá para conferir se a métrica a "
+                    "encontra. O de resultados usa a carteira.",
+            rodape=f"{REPO}"),
+        cards.tabela(
+            "O número que esta conta não esconde",
+            ("Janela", "CAGR", "Excesso aj.", "t"),
+            # Média geométrica ponderada por pregão: as três janelas têm
+            # 672, 495 e 498 dias, e tratá-las como iguais inflaria a de
+            # 2022–23, que é a melhor e a mais curta.
+            [("Construção (2017–23)", _pct0(
+                np.exp((np.log1p(_CONSTR.cagr) * _CONSTR.pregoes).sum()
+                       / _CONSTR.pregoes.sum()) - 1, 2),
+              "—", "—"),
+             ("Reservada (2024–26)", _pct0(RESERVADA.cagr, 2),
+              _pct(RESERVADA.alpha, 2), _num(RESERVADA.t_alpha))],
+            "resultado", destacar=1,
+            leitura=f"Na janela reservada — a que não participou de nenhuma "
+                    f"decisão de construção — o excesso ajustado tem t = "
+                    f"{_num(RESERVADA.t_alpha)}. Isso não rejeita a hipótese "
+                    f"de que o excesso seja zero. Está dito aqui, no começo.",
+            rodape=FONTE_REAL),
+        cards.conceito(
+            "Resultado sai; método não",
+            "Sai: retorno, referência, volatilidade, pior queda, excesso "
+            "ajustado com erro-padrão, beta, caixa e número de posições.\n\n"
+            "Não sai: como as empresas são avaliadas, que filtros de "
+            "elegibilidade existem, como a posição é dimensionada e quando "
+            "ela é encerrada.\n\n"
+            "A separação é o que permite abrir o ferramental de métricas "
+            "para qualquer pessoa sem abrir o que produz os números.",
+            "resultado",
+            rodape="Conteúdo educacional · não é recomendação "
+                   "individualizada · resultados passados não garantem "
+                   "resultados futuros"),
+        cards.codigo(
+            "O ferramental é seu",
+            ["pip install git+https://github.com/Gustavofthiesen/wizz-lab",
+             "",
+             "from wizzlab import metrics, resultados",
+             "",
+             "metrics.risco.resumo(minha_carteira)",
+             "resultados.resumo()"],
+            saida=["153 métricas · 4 notebooks no Colab"],
+            serie="resultado",
+            leitura="As 153 métricas existem para responder uma pergunta: "
+                    "como distinguir um backtest convincente de uma "
+                    "estratégia robusta. Valem para qualquer carteira.",
+            rodape=f"{REPO} · MIT"),
+    ]
+
+
 def r01_por_janela():
     """O resultado medido, janela a janela."""
     def plot(ax):
@@ -552,6 +630,7 @@ PROGRAMA = {
         ("m04-excesso", "Excesso ajustado por risco e beta", m04_excesso),
     ],
     "resultados": [
+        ("r00-abertura", "O que esta conta publica", r00_abertura),
         ("r01-por-janela", "Resultado da carteira, janela a janela",
          r01_por_janela),
         ("r02-ressalvas", "O que estes números não dizem", r02_ressalvas),

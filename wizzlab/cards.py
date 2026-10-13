@@ -595,6 +595,119 @@ def em_aberto(titulo: str, questoes: list[str], serie: str = "research",
     return fig
 
 
+# --- card de carteira --------------------------------------------------------
+#: Termos que denunciariam o método se aparecessem num rótulo de posição.
+#: O card publica peso e caixa. Nada que explique *por que* a posição existe.
+_PROIBIDO_NO_ROTULO = ("valor justo", "mos", "margem de seguran", "p50",
+                       "upside", "desconto", "grid", "portao", "portão",
+                       "manga", "perfil", "subsetor", "score", "filtro",
+                       "alvo", "tese")
+
+
+def _conferir_rotulos(posicoes) -> None:
+    """Recusa a montar o card se um rótulo carregar método.
+
+    A carteira é a única peça pública que fala de posição individual, e por
+    isso é onde o vazamento é mais barato de cometer: basta alguém passar
+    ``("PETR4", "MoS 18%", 0.07)`` achando que está enriquecendo o card. O
+    programa publica **resultado**, nunca **método** — nem em nome de coluna.
+    Falhar alto aqui custa menos que um post publicado.
+    """
+    for ticker, nota, _peso in posicoes:
+        texto = f"{ticker} {nota}".lower()
+        for termo in _PROIBIDO_NO_ROTULO:
+            if termo in texto:
+                raise ValueError(
+                    f"rótulo {ticker!r}/{nota!r} contém {termo!r}: isso é "
+                    "método, não resultado. O card de carteira publica peso "
+                    "e caixa, mais nada.")
+
+
+def carteira(titulo: str, posicoes: list[tuple[str, str, float]],
+             caixa: float, serie: str = "resultado", data: str = "",
+             leitura: str = "", rodape: str = "") -> Figure:
+    """Card da composição: tickers, pesos e caixa. Nada além disso.
+
+    Barras horizontais em vez de rosca. Uma rosca obriga a comparar ângulos;
+    uma barra deixa o leitor ler o peso direto na escala, e é nessa leitura
+    que está o conteúdo. Caixa entra como última barra, em cor de acento,
+    porque caixa também é uma posição — a decisão de não estar comprado.
+
+    Parameters
+    ----------
+    posicoes:
+        ``(ticker, nota, peso)``. ``nota`` é opcional (``""``) e só admite
+        informação neutra, como tempo em carteira. Ver `_conferir_rotulos`.
+    caixa:
+        Fração em caixa. Soma com os pesos deve dar ~1.
+    data:
+        Data da foto da carteira. Um peso sem data não significa nada.
+
+    Raises
+    ------
+    ValueError
+        Se algum rótulo carregar termo de método, ou se os pesos não fecharem.
+    """
+    _conferir_rotulos(posicoes)
+    soma = sum(p for _, _, p in posicoes) + caixa
+    if abs(soma - 1.0) > 0.015:
+        raise ValueError(f"pesos somam {soma:.4f}; deveriam somar 1")
+
+    fig, estilo = _base(serie)
+    titulo_f, texto_f = _fontes()
+
+    _texto_ajustado(fig, titulo, MARGEM, 0.875, fonte=titulo_f, tamanho=28,
+                    cor=estilo.tinta, peso="heavy", va="top",
+                    linespacing=1.18, min_tamanho=19)
+    if data:
+        fig.text(MARGEM, 0.778, f"Posição em {data}", fontsize=12.5,
+                 color=estilo.meta, family=texto_f, va="center")
+
+    ordenadas = sorted(posicoes, key=lambda x: -x[2])
+    itens = [(t, n, p, estilo.tinta) for t, n, p in ordenadas]
+    itens.append(("CAIXA", "", caixa, estilo.acento))
+
+    # A leitura cresce com o número de linhas; reservar a faixa de baixo para
+    # ela aqui é o que impede o texto de passar por cima das barras quando a
+    # carteira tem doze posições em vez de seis.
+    topo, base = 0.715, 0.300
+    passo = (topo - base) / max(len(itens), 1)
+    altura = min(passo * 0.30, 0.017)
+    x0 = MARGEM
+    # A escala vai até o maior peso, não até 1: com 10 posições de 7% uma
+    # escala cheia colapsaria todas as barras numa faixa ilegível.
+    escala = (1 - 2 * MARGEM - 0.14) / max(p for _, _, p, _ in itens)
+
+    y = topo
+    for ticker, nota, peso, cor in itens:
+        # Rótulo e percentual na mesma linha de base, barra logo abaixo:
+        # o olho lê o par ticker/peso de uma vez e usa a barra só para
+        # comparar tamanhos, que é para o que ela serve.
+        y_texto = y + altura + 0.016
+        fig.text(x0, y_texto, ticker, fontsize=14.5, color=cor,
+                 family=texto_f, fontweight="semibold", va="center")
+        if nota:
+            fig.text(x0 + 0.115, y_texto, nota, fontsize=11,
+                     color=estilo.meta, family=texto_f, va="center")
+        fig.add_artist(plt.Rectangle((x0, y), peso * escala, altura,
+                                     facecolor=cor, edgecolor="none"))
+        fig.text(1 - MARGEM, y_texto,
+                 f"{peso * 100:.1f}".replace(".", ",") + "%", fontsize=14.5,
+                 color=cor, family=texto_f, fontweight="semibold",
+                 va="center", ha="right")
+        y -= passo
+
+    if leitura:
+        fig.text(MARGEM, 0.255, _quebrar(leitura, 52), fontsize=14.5,
+                 color=estilo.tinta, family=texto_f, va="top",
+                 linespacing=1.5)
+    fig.text(MARGEM, 0.098, _quebrar(
+        rodape or "Pesos sobre o patrimônio da conta. Sem recomendação "
+        "individualizada.", 78), fontsize=11, color=estilo.meta,
+        family=texto_f, va="top", linespacing=1.4)
+    return fig
+
+
 # --- utilidades --------------------------------------------------------------
 def salvar(fig: Figure, caminho: str) -> str:
     """Salva o card em PNG no tamanho exato de 1080 × 1350, sem recorte.
