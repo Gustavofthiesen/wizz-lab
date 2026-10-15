@@ -112,7 +112,16 @@ def _base(serie: str) -> tuple[Figure, EstiloSerie]:
 
 
 def _quebrar(texto: str, largura: int) -> str:
-    return "\n".join(textwrap.wrap(texto, largura)) if texto else ""
+    """Quebra por palavra, nunca no meio de uma.
+
+    O padrão do `textwrap` parte palavra longa e hífen, o que corta URL no
+    meio -- ``github.com/Gustavofthiesen/wizz-`` numa linha e ``lab`` na
+    outra, em todo rodapé que cita o repositório.
+    """
+    if not texto:
+        return ""
+    return "\n".join(textwrap.wrap(texto, largura, break_long_words=False,
+                                   break_on_hyphens=False))
 
 
 def _largura_util(fig: Figure) -> float:
@@ -258,7 +267,7 @@ def numero(valor: str, legenda: str, serie: str = "data", contexto: str = "",
 
 # --- card de gráfico ---------------------------------------------------------
 def grafico(titulo: str, figura_fn, serie: str = "data", leitura: str = "",
-            rodape: str = "") -> Figure:
+            rodape: str = "", simulado: bool = False) -> Figure:
     """Card com um gráfico embutido.
 
     Parameters
@@ -270,6 +279,15 @@ def grafico(titulo: str, figura_fn, serie: str = "data", leitura: str = "",
     leitura:
         A frase de "o que observar". Um gráfico sem pergunta explícita é ruído
         visual -- este campo existe para que ela nunca falte.
+    simulado:
+        Carimba **DADOS SIMULADOS** dentro da área do gráfico.
+
+        Não é redundante com a fonte no rodapé, e a diferença importa. O
+        trilho de métricas desenha série simulada sobre anos de calendário
+        reais; num card que só difere do trilho de resultados pela cor de
+        fundo, quem passa o dedo lê a curva como sendo a carteira. O rodapé em
+        sálvia de 11 pt não desfaz isso. O carimbo fica no mesmo lugar onde o
+        olho já está.
     """
     fig, estilo = _base(serie)
     titulo_f, texto_f = _fontes()
@@ -292,6 +310,14 @@ def grafico(titulo: str, figura_fn, serie: str = "data", leitura: str = "",
             else "#1E3C3A", linewidth=0.9)
     ax.set_axisbelow(True)
     figura_fn(ax)
+
+    if simulado:
+        # Canto superior direito da área de plotagem: fora do caminho da
+        # curva na maioria dos gráficos, e dentro do enquadramento que o
+        # leitor já está olhando.
+        ax.text(0.995, 1.02, "DADOS SIMULADOS", transform=ax.transAxes,
+                fontsize=10, color=estilo.acento, family=texto_f,
+                fontweight="bold", ha="right", va="bottom")
 
     if leitura:
         fig.text(MARGEM, 0.255, _quebrar(leitura, 50), fontsize=15.5,
@@ -403,17 +429,48 @@ def tabela(titulo: str, cabecalho: tuple[str, ...], linhas: list[tuple],
 
     n_col = len(cabecalho)
     largura = (1 - 2 * MARGEM)
-    # Primeira coluna mais larga: costuma carregar o rótulo textual.
-    pesos = [1.7] + [1.0] * (n_col - 1)
-    total = sum(pesos)
+
+    # As larguras saem do conteúdo medido, não de pesos fixos. Com pesos
+    # fixos, uma coluna de texto mais longo que o previsto invade a vizinha
+    # e o card sai com as duas sobrepostas -- sem erro, sem aviso, só
+    # ilegível no post publicado.
+    renderer = fig.canvas.get_renderer()
+
+    def _medir(txt: str, corpo: float, peso: str = "normal") -> float:
+        """Largura do texto em fração da figura."""
+        a = fig.text(0, 0, txt, fontsize=corpo, family=texto_f,
+                     fontweight=peso)
+        w = a.get_window_extent(renderer=renderer).width
+        a.remove()
+        return w / (fig.dpi * fig.get_figwidth())
+
+    GOTEIRA = 0.022          # respiro mínimo entre colunas
+    corpo = 16.0
+    while corpo >= 11.0:
+        necessario = []
+        for i in range(n_col):
+            celulas = [str(linha[i]) for linha in linhas]
+            necessario.append(max(
+                [_medir(c, corpo) for c in celulas] +
+                [_medir(cabecalho[i].upper(), 11.5, "bold")]))
+        if sum(necessario) + GOTEIRA * (n_col - 1) <= largura:
+            break
+        corpo -= 0.5
+
+    # A folga que sobrar vai para a primeira coluna, que é a que carrega
+    # rótulo textual e respira melhor à esquerda.
+    folga = largura - sum(necessario) - GOTEIRA * (n_col - 1)
+    cols = list(necessario)
+    cols[0] += max(folga, 0)
+
     xs, acumulado = [], MARGEM
-    for p in pesos:
+    for w in cols:
         xs.append(acumulado)
-        acumulado += largura * p / total
+        acumulado += w + GOTEIRA
 
     def _x(i: int) -> float:
-        """Primeira coluna alinha à esquerda; as de número, à direita."""
-        return xs[i] if i == 0 else xs[i] + largura * pesos[i] / total
+        """Primeira coluna alinha à esquerda; as demais, à direita."""
+        return xs[i] if i == 0 else xs[i] + cols[i]
 
     y = 0.715
     for i, rotulo in enumerate(cabecalho):
@@ -428,7 +485,7 @@ def tabela(titulo: str, cabecalho: tuple[str, ...], linhas: list[tuple],
         cor = estilo.acento if k == destacar else estilo.tinta
         peso = "semibold" if k == destacar else "normal"
         for i, valor in enumerate(linha):
-            fig.text(_x(i), y, str(valor), fontsize=16, color=cor,
+            fig.text(_x(i), y, str(valor), fontsize=corpo, color=cor,
                      family=texto_f, fontweight=peso, va="center",
                      ha="left" if i == 0 else "right")
         y -= 0.052

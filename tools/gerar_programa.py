@@ -96,7 +96,7 @@ def m01_cagr():
         ben = metrics.risco.curva_capital(REF) * 100
         ax.plot(cap.index, cap.values, color=brand.VERDE_FLORESTA, lw=2.2)
         ax.plot(ben.index, ben.values, color=brand.COBRE, lw=1.8)
-        ax.annotate("carteira", xy=(cap.index[-1], cap.iloc[-1]), xytext=(8, 0),
+        ax.annotate("série simulada", xy=(cap.index[-1], cap.iloc[-1]), xytext=(8, 0),
                     textcoords="offset points", color=brand.VERDE_FLORESTA,
                     fontsize=12, fontweight="semibold", va="center")
         ax.annotate("referência", xy=(ben.index[-1], ben.iloc[-1]),
@@ -128,7 +128,7 @@ def m01_cagr():
             rodape="Identidade, não estimativa"),
         cards.grafico(
             "Capital acumulado contra a referência",
-            plot, "metrica",
+            plot, "metrica", simulado=True,
             leitura=f"Ambas em base 100, no mesmo intervalo. CAGR de "
                     f"{_pct0(cagr, 2)} contra {_pct0(cagr_ref, 2)} da "
                     "referência.",
@@ -200,7 +200,7 @@ def m02_drawdown():
             rodape="Martin & McCann"),
         cards.grafico(
             "A série de drawdown",
-            plot, "metrica",
+            plot, "metrica", simulado=True,
             leitura=f"Queda percentual desde o pico anterior, dia a dia. O "
                     f"episódio mais profundo chegou a {_pct(mdd, 1)}; o período "
                     f"inteiro passou {tuw:.0%} do tempo abaixo de algum pico.",
@@ -277,7 +277,7 @@ def m03_sharpe():
             rodape="Lo (2002) · doi 10.2469/faj.v58.n4.2453"),
         cards.grafico(
             "As três sobre a mesma série",
-            plot, "metrica",
+            plot, "metrica", simulado=True,
             leitura=f"Volatilidade anual de {_pct0(vol, 1)}. A diferença entre "
                     "Sharpe e Sortino indica quanto da oscilação está no lado "
                     "favorável.",
@@ -330,7 +330,7 @@ def m04_excesso():
         ax.axvline(0, color=brand.LINHA_SUTIL, lw=1)
         ax.set_xlabel("retorno da referência, % ao dia",
                       color=brand.CINZA_SALVIA, fontsize=11)
-        ax.set_ylabel("retorno da carteira, % ao dia",
+        ax.set_ylabel("retorno da série simulada, % ao dia",
                       color=brand.CINZA_SALVIA, fontsize=11)
         ax.grid(True, axis="both", color=brand.LINHA_SUTIL, lw=.7)
 
@@ -354,7 +354,7 @@ def m04_excesso():
             rodape="Mínimos quadrados sobre retornos diários"),
         cards.grafico(
             "Carteira contra referência, dia a dia",
-            plot, "metrica",
+            plot, "metrica", simulado=True,
             leitura=f"Cada ponto é um pregão. A inclinação da reta é o beta "
                     f"({_num(float(reg['beta']))}); o intercepto é o excesso. "
                     f"R² de {_num(float(reg['r2']))}.",
@@ -414,14 +414,18 @@ def r00_abertura():
                   "mesmo jeito que se cobraria de qualquer outra."),
         cards.tabela(
             "Dois trilhos",
-            ("Trilho", "O que é", "Dado"),
-            [("Métricas", "como avaliar", "simulado"),
-             ("Resultados", "o que entregou", "carteira real")],
+            ("", "Métricas", "Resultados"),
+            [("o que é", "como avaliar", "o que entregou"),
+             ("dado", "série simulada", f"{int(CHEIA.pregoes):,}".replace(
+                 ",", ".") + " pregões"),
+             ("o que sai", "fórmula e código", "número com erro-padrão"),
+             ("serve para", "qualquer carteira", "prestar contas desta")],
             "resultado",
-            leitura="O trilho de métricas usa série simulada de propósito: "
+            leitura="A série do trilho de métricas é simulada de propósito: "
                     "quando se define o processo gerador, sabe-se qual é a "
-                    "resposta certa e dá para conferir se a métrica a "
-                    "encontra. O de resultados usa a carteira.",
+                    "resposta certa, e dá para conferir se a métrica a "
+                    "encontra. É o único jeito de testar a ferramenta antes "
+                    "de confiar nela.",
             rodape=f"{REPO}"),
         cards.tabela(
             "O número que esta conta não esconde",
